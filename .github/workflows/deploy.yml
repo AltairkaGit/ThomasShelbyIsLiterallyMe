@@ -14,7 +14,7 @@ jobs:
       - name: Stop and remove containers, networks
         run: cat /home/k-admin/secret | sudo -S docker-compose --env-file /home/k-admin/shlb/env.properties down
       - name: clean unused docker data
-        run: cat /home/k-admin/secret | sudo -S docker rmi conversay_server --force
+        run: cat /home/k-admin/secret | sudo -S docker rmi thomasshelbyisliterallyme_server --force
   deploy:
     runs-on: shlb
     needs: prepare-environment
