@@ -1,0 +1,23 @@
+name: Deploy
+
+on:
+  push:
+    branches: ['dev', 'main']
+jobs:
+  prepare-environment:
+    runs-on: self-hosted
+    steps:
+      - name: get source code
+        uses: actions/checkout@v3
+      - name: set env properties
+        run: yes | cp -f /home/k-admin/shlb/env.properties .
+      - name: Stop and remove containers, networks
+        run: cat /home/k-admin/secret | sudo -S docker-compose --env-file /home/k-admin/shlb/env.properties down
+      - name: clean unused docker data
+        run: cat /home/k-admin/secret | sudo -S docker rmi conversay_server --force
+  deploy:
+    runs-on: shlb
+    needs: prepare-environment
+    steps:
+      - name: docker-compose
+        run: cat /home/k-admin/secret | sudo -S docker-compose --env-file /home/k-admin/shlb/env.properties up -d

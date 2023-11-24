@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    ports:
+      - "46877:5432"
+    volumes:
+      - /home/k-admin/postgres/convy/data/db/data/:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    networks:
+      - netgt
+    expose:
+      - 5432
+  kurento:
+    image: kurento:latest
+    ports:
+      - "8888:8888"
+    networks:
+      - netgt
+    expose:
+      - 8888
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "46876:80"
+    depends_on:
+      - db
+      - kurento
+    networks:
+      - netgt
+    expose:
+      - 80
+    volumes:
+      - /home/k-admin/convy/:/app/
+networks:
+  netgt:
+    driver: bridge
