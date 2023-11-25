@@ -7,6 +7,7 @@ import com.thomas.modules.music.repos.GenreRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -27,4 +28,13 @@ public class GenresControllerV2 {
         List<GenreEntity> genres = genreRepository.findAll();
         return ResponseEntity.ok(genreMapper.convertList(genres));
     }
+
+    @GetMapping("")
+    public ResponseEntity<GenreDto> getGenre(
+            @RequestParam("genre") String genre
+    ) {
+        GenreEntity entity = genreRepository.findByGenre(genre);
+        return ResponseEntity.ok(genreMapper.convert(entity));
+    }
+
 }
