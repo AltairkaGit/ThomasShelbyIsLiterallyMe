@@ -5,11 +5,11 @@ import com.thomas.modules.chat.dto.RoomMessageDto;
 import java.util.List;
 
 public class RoomDto {
-
     private Long ownerId;
     private List<TrackDto> tracks;
     private List<RoomMessageDto> messages;
     private List<Long> users;
+    private List<Long> offers;
     private boolean isOwner;
     private String artifact;
 
@@ -59,5 +59,13 @@ public class RoomDto {
 
     public void setArtifact(String artifact) {
         this.artifact = artifact;
+    }
+
+    public List<Long> getOffers() {
+        return offers;
+    }
+
+    public void setOffers(List<Long> offers) {
+        this.offers = offers;
     }
 }
