@@ -56,7 +56,7 @@ public class TrackDto {
     }
 
     public void setPictureUrl(String pictureUrl) {
-        pictureUrl = pictureUrl;
+        this.pictureUrl = pictureUrl;
     }
 
     public String getClipUrl() {
