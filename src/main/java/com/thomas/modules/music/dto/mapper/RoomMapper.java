@@ -35,6 +35,7 @@ public abstract class RoomMapper {
         dto.setOwner(Objects.equals(userId, dto.getOwnerId()));
         dto.setTracks(trackMapper.convertList(trackRepository.findAllTracksByTrackIdIn(room.getTrackList())));
         dto.setMessages(convertList(room.getMessageList()));
+        dto.setArtifact(room.getArtifact());
         return dto;
 
     }

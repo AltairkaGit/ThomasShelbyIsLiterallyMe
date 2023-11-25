@@ -11,6 +11,7 @@ public class RoomDto {
     private List<RoomMessageDto> messages;
     private List<Long> users;
     private boolean isOwner;
+    private String artifact;
 
     public List<Long> getUsers() {
         return users;
@@ -50,5 +51,13 @@ public class RoomDto {
 
     public void setMessages(List<RoomMessageDto> messages) {
         this.messages = messages;
+    }
+
+    public String getArtifact() {
+        return artifact;
+    }
+
+    public void setArtifact(String artifact) {
+        this.artifact = artifact;
     }
 }

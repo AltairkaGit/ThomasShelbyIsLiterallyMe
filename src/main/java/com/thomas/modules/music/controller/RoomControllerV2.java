@@ -14,6 +14,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.web.bind.annotation.*;
 
+import javax.naming.AuthenticationException;
+
 @RestController
 @RequestMapping("/api/v2/room")
 public class RoomControllerV2 {
@@ -41,6 +43,17 @@ public class RoomControllerV2 {
             @RequestParam("roomId") Long roomId
     ) {
         Room room = roomService.create(roomId);
+        return ResponseEntity.ok(roomMapper.convert(userId, room));
+    }
+
+    @PutMapping("/{roomId}-{artifact}")
+    public ResponseEntity<RoomDto> joinRoom(
+            @RequestAttribute("reqUserId") Long userId,
+            @PathVariable("roomId") Long roomId,
+            @PathVariable("artifact") String artifact
+    ) throws AuthenticationException {
+        roomService.joinRoom(roomId, userId, artifact);
+        Room room = roomService.getById(roomId);
         return ResponseEntity.ok(roomMapper.convert(userId, room));
     }
 

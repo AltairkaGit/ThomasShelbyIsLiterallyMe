@@ -3,6 +3,7 @@ package com.thomas.modules.music.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -13,6 +14,7 @@ public class Room {
     private Queue<RoomMessage> messageQueue;
     private List<Long> users;
     private List<Long> offers;
+    private String artifact;
 
     public Room(Long userId) {
         this.ownerId = userId;
@@ -20,6 +22,7 @@ public class Room {
         this.messageQueue = new ConcurrentLinkedQueue<>();
         this.users = new CopyOnWriteArrayList<>();
         this.users.add(ownerId);
+        this.artifact = UUID.randomUUID().toString();
     }
 
     public void sendOffer(Long myId, Long userId) {
@@ -27,15 +30,22 @@ public class Room {
         offers.add(userId);
     }
 
-    public void acceptOffer( Long userId) {
+    public void acceptOffer(Long userId) {
         if (offers.contains(userId)) {
             offers.remove(userId);
+            users.remove(userId);
             users.add(userId);
         }
     }
 
-    public void declineOffer( Long myId) {
+    public void declineOffer(Long myId) {
         offers.remove(myId);
+    }
+
+    public void joinRoom(Long myId) {
+        users.remove(myId);
+        offers.remove(myId);
+        users.add(myId);
     }
 
     public void removeUser(Long myId, Long userId) {
@@ -43,9 +53,8 @@ public class Room {
         users.removeIf(u -> u.equals(userId));
     }
 
-    public Integer leave(Long userId) {
-        users.removeIf(u -> u.equals(userId));
-        return users.size();
+    public void leave(Long userId) {
+        users.remove(userId);
     }
 
     public RoomMessage sendMessage(Long myId, String content) {
@@ -75,6 +84,14 @@ public class Room {
 
     public void setUsers(List<Long> users) {
         this.users = users;
+    }
+
+    public List<Long> getOffers() {
+        return offers;
+    }
+
+    public String getArtifact() {
+        return artifact;
     }
 
     @Override

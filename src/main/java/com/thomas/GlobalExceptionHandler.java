@@ -44,6 +44,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler({
+            NullPointerException.class
+    })
+    public ResponseEntity<String> handleNullPointer(Exception ex) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler({
             WrongEmailException.class,
             LessMinLengthException.class,
             MoreMaxLengthException.class,

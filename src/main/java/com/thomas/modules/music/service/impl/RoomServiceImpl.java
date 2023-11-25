@@ -5,6 +5,7 @@ import com.thomas.modules.music.model.RoomMessage;
 import com.thomas.modules.music.service.RoomService;
 import org.springframework.stereotype.Service;
 
+import javax.naming.AuthenticationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,6 +50,21 @@ public class RoomServiceImpl implements RoomService {
     public void leave(Long roomId, Long userId) {
         Room room = rooms.get(roomId);
         room.leave(userId);
+    }
+
+    @Override
+    public void joinRoom(Long roomId, Long myId, String artifact) throws AuthenticationException {
+        Room room = rooms.get(roomId);
+        if (!room.getArtifact().equals(artifact))
+            throw new AuthenticationException("link is invalid");
+        room.joinRoom(myId);
+    }
+
+    @Override
+    public Room getById(Long roomId) throws IllegalArgumentException {
+        Room room = rooms.get(roomId);
+        if (room == null) throw new IllegalArgumentException("the room is no longer exist");
+        return room;
     }
 
     @Override
