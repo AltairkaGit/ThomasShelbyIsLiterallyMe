@@ -23,7 +23,7 @@ public class GenresControllerV2 {
         this.genreMapper = genreMapper;
     }
 
-    @GetMapping("")
+    @GetMapping("/all")
     public ResponseEntity<List<GenreDto>> getGenres() {
         List<GenreEntity> genres = genreRepository.findAll();
         return ResponseEntity.ok(genreMapper.convertList(genres));
