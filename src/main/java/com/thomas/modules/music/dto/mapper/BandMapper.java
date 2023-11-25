@@ -30,7 +30,7 @@ public abstract class BandMapper {
         dto.setName(entity.getName());
         dto.setBandId(entity.getBandId());
         dto.setOwnerId(entity.getOwner().getUserId());
-        dto.setPictureUrl(fileResponseMapper.map(Optional.of(entity.getPicture())));
+        dto.setPictureUrl(fileResponseMapper.map(Optional.ofNullable(entity.getPicture())));
         dto.setMembers(userProfileResponseMapper.convertList(members));
 
         return dto;

@@ -17,12 +17,12 @@ import java.util.Optional;
 @Service
 public class BandServiceImpl implements BandService {
     private final BandRepository bandRepository;
-    private final BandMemberRepository bandMemerRepository;
+    private final BandMemberRepository bandMemberRepository;
 
 
-    public BandServiceImpl(BandRepository bandRepository, BandMemberRepository bandMemerRepository) {
+    public BandServiceImpl(BandRepository bandRepository, BandMemberRepository bandMemberRepository) {
         this.bandRepository = bandRepository;
-        this.bandMemerRepository = bandMemerRepository;
+        this.bandMemberRepository = bandMemberRepository;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class BandServiceImpl implements BandService {
 
     @Override
     public Optional<BandEntity> getUserBand(Long userId) {
-        return bandMemerRepository.findUserBand(userId);
+        return bandMemberRepository.findUserBand(userId);
     }
 
     @Override
@@ -46,7 +46,9 @@ public class BandServiceImpl implements BandService {
 
         BandMemberEntity member = new BandMemberEntity();
         member.setId(BandMemberKey.valueOf(owner.getUserId(), band.getBandId()));
-        bandMemerRepository.saveAndFlush(member);
+        member.setBand(band);
+        member.setArtist(owner);
+        bandMemberRepository.saveAndFlush(member);
 
         return band;
     }
@@ -61,6 +63,6 @@ public class BandServiceImpl implements BandService {
     public void addMember(BandEntity band, Long newArtistId) {
         BandMemberEntity member = new BandMemberEntity();
         member.setId(BandMemberKey.valueOf(newArtistId, band.getBandId()));
-        bandMemerRepository.saveAndFlush(member);
+        bandMemberRepository.saveAndFlush(member);
     }
 }

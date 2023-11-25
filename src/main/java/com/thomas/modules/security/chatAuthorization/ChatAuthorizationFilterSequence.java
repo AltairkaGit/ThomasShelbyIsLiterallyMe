@@ -46,7 +46,5 @@ public class ChatAuthorizationFilterSequence implements FilterSequence {
         if (userChatRoles != null && !userChatRoles.isEmpty())
             roles.addAll(userChatRoles);
         context.put(ComposerContextEnum.ChatAuthorities, roles.stream().map(role -> new SimpleGrantedAuthority(role.toString())).collect(Collectors.toList()));
-
-
     }
 }

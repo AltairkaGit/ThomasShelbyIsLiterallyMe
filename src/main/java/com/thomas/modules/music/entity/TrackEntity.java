@@ -34,7 +34,7 @@ public class TrackEntity {
     @JoinColumn(name = "picture_id")
     private FileEntity picture;
 
-    @Column(name = "diration")
+    @Column(name = "duration")
     private Integer duration;
 
     @ManyToOne

@@ -12,6 +12,7 @@ public class Room {
     private Queue<Long> trackQueue;
     private Queue<RoomMessage> messageQueue;
     private List<Long> users;
+    private List<Long> offers;
 
     public Room(Long userId) {
         this.ownerId = userId;
@@ -21,22 +22,29 @@ public class Room {
         this.users.add(ownerId);
     }
 
-    void addUser(Long myId, Long userId) {
+    public void addUser(Long myId, Long userId) {
         if (!myId.equals(ownerId)) return;
         users.add(userId);
     }
 
-    void removeUser(Long myId, Long userId) {
+    public void removeUser(Long myId, Long userId) {
         if (!myId.equals(ownerId)) return;
-        users.remove(userId);
+        users.removeIf(u -> u.equals(userId));
     }
 
-    void sendMessage(Long myId, String content) {
-        if (!users.contains(myId)) return;
+    public Integer leave(Long userId) {
+        users.removeIf(u -> u.equals(userId));
+        return users.size();
+    }
+
+    public RoomMessage sendMessage(Long myId, String content) {
+        if (!users.contains(myId)) return null;
         if (messageQueue.size() > QUEUE_LIMIT) {
             messageQueue.poll();
         }
-        messageQueue.add(new RoomMessage(myId, content));
+        RoomMessage message = new RoomMessage(myId, content);
+        messageQueue.add(message);
+        return message;
     }
 
     public Long getOwnerId() {

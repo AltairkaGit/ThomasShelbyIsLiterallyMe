@@ -15,14 +15,6 @@ services:
       - netgt
     expose:
       - 5432
-  kurento:
-    image: kurento/kurento-media-server
-    ports:
-      - "8888:8888"
-    networks:
-      - netgt
-    expose:
-      - 8888
   server:
     build:
       context: .
@@ -31,7 +23,6 @@ services:
       - "46876:80"
     depends_on:
       - db
-      - kurento
     networks:
       - netgt
     expose:
