@@ -4,11 +4,13 @@ import com.thomas.modules.file.entity.FileEntity;
 import com.thomas.modules.file.service.FileService;
 import com.thomas.modules.music.dto.AlbumDto;
 import com.thomas.modules.music.dto.TrackDto;
+import com.thomas.modules.music.dto.TracksRequestDto;
 import com.thomas.modules.music.dto.mapper.AlbumMapper;
 import com.thomas.modules.music.dto.mapper.TrackMapper;
 import com.thomas.modules.music.entity.AlbumEntity;
 import com.thomas.modules.music.entity.BandEntity;
 import com.thomas.modules.music.entity.TrackEntity;
+import com.thomas.modules.music.repos.TrackRepository;
 import com.thomas.modules.music.service.AlbumService;
 import com.thomas.modules.music.service.BandService;
 import com.thomas.modules.user.entity.UserEntity;
@@ -20,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.naming.AuthenticationException;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v2/music")
@@ -30,13 +33,16 @@ public class TrackControllerV2 {
     private final AlbumMapper albumMapper;
     private final TrackMapper trackMapper;
     private final FileService fileService;
-    public TrackControllerV2(UserService userService, AlbumService albumService, BandService bandService, AlbumMapper albumMapper, TrackMapper trackMapper, FileService fileService) {
+    private final TrackRepository trackRepository;
+
+    public TrackControllerV2(UserService userService, AlbumService albumService, BandService bandService, AlbumMapper albumMapper, TrackMapper trackMapper, FileService fileService, TrackRepository trackRepository) {
         this.userService = userService;
         this.albumService = albumService;
         this.bandService = bandService;
         this.albumMapper = albumMapper;
         this.trackMapper = trackMapper;
         this.fileService = fileService;
+        this.trackRepository = trackRepository;
     }
 
     @GetMapping("/lastReleases")
@@ -65,6 +71,7 @@ public class TrackControllerV2 {
     }
 
     @PostMapping("/album/{albumId}/track")
+    @Transactional
     public ResponseEntity<TrackDto> createAlbum(
             @RequestAttribute("reqUserId") Long userId,
             @PathVariable Long albumId,
@@ -82,5 +89,30 @@ public class TrackControllerV2 {
         FileEntity trackFile = fileService.uploadFile(file);
         TrackEntity track = albumService.create(band, album, name, trackFile, genre, pictureFile);
         return ResponseEntity.ok(trackMapper.convert(track));
+    }
+
+    @GetMapping("/genre")
+    public ResponseEntity<List<TrackDto>> getTracksByGenre(
+        @RequestParam("genre") String  genre
+    ) {
+        List<TrackEntity> tracks = trackRepository.findAllByGenreGenre(genre);
+        return ResponseEntity.ok(trackMapper.convertList(tracks));
+    }
+
+    @GetMapping("/track/{trackId}")
+    public ResponseEntity<TrackDto> getTrackById(
+            @PathVariable Long trackId
+    ) {
+        Optional<TrackEntity> track = trackRepository.findById(trackId);
+        if (track.isEmpty()) throw new IllegalArgumentException("No track with this id");
+        return ResponseEntity.ok(trackMapper.convert(track.get()));
+    }
+
+    @PostMapping("/tracks")
+    public ResponseEntity<List<TrackDto>> getTracksByIds(
+            @RequestBody TracksRequestDto dto
+    ) {
+        List<TrackEntity> tracks = trackRepository.findAllTracksByTrackIdIn(dto.getIds());
+        return ResponseEntity.ok(trackMapper.convertList(tracks));
     }
 }
