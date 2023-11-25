@@ -76,6 +76,7 @@ public class RoomControllerV2 {
         Long roomId = Long.valueOf(roomIdParam);
 
         RoomMessage message = roomService.sendMessage(roomId, myId, content);
+        System.out.println("" + roomId + " " + myId + " " + message);
         simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/chat", message);
     }
 
