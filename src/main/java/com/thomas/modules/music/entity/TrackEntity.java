@@ -17,12 +17,13 @@ public class TrackEntity {
     @Column(name = "track_name")
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "album_id")
     private AlbumEntity album;
 
     @OneToOne
     @JoinColumn(name = "track_id")
+    @MapsId
     private FileEntity track;
 
     @OneToOne
