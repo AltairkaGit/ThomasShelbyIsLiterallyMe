@@ -9,12 +9,14 @@ import com.thomas.modules.music.entity.BandEntity;
 import com.thomas.modules.music.service.BandService;
 import com.thomas.modules.user.entity.UserEntity;
 import com.thomas.modules.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.naming.AuthenticationException;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v2/band")
@@ -39,6 +41,15 @@ public class BandControllerV2 {
         UserEntity me = userService.getUserById(userId);
         BandEntity band = bandService.createBand(me, dto);
         return ResponseEntity.ok(bandMapper.convert(band));
+    }
+
+    @GetMapping("")
+    @Operation(summary = "get your band, returns band or null")
+    ResponseEntity<BandDto> getYourBand(
+            @RequestAttribute("reqUserId") Long userId
+    ) {
+        Optional<BandEntity> band = bandService.getUserBand(userId);
+        return ResponseEntity.ok(band.map(bandMapper::convert).orElse(null));
     }
 
     @PostMapping("/member")

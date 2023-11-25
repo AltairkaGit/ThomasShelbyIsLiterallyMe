@@ -33,6 +33,11 @@ public class BandServiceImpl implements BandService {
     }
 
     @Override
+    public Optional<BandEntity> getUserBand(Long userId) {
+        return bandMemerRepository.findUserBand(userId);
+    }
+
+    @Override
     public BandEntity createBand(UserEntity owner, CreateBandDto dto) {
         BandEntity band = new BandEntity();
         band.setOwner(owner);
