@@ -22,9 +22,9 @@ public class Room {
         this.users.add(ownerId);
     }
 
-    public void addUser(Long myId, Long userId) {
+    public void sendRequset(Long myId, Long userId) {
         if (!myId.equals(ownerId)) return;
-        users.add(userId);
+        offers.add(userId);
     }
 
     public void removeUser(Long myId, Long userId) {
