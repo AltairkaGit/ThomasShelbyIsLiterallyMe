@@ -28,9 +28,21 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public void addUser(Long roomId, Long myId, Long userId) {
+    public void sendOffer(Long roomId, Long myId, Long userId) {
         Room room = rooms.get(roomId);
-        room.addUser(myId, userId);
+        room.sendOffer(myId, userId);
+    }
+
+    @Override
+    public void acceptOffer(Long roomId, Long myId) {
+        Room room = rooms.get(roomId);
+        room.acceptOffer(myId);
+    }
+
+    @Override
+    public void declineOffer(Long roomId, Long myId) {
+        Room room = rooms.get(roomId);
+        room.declineOffer(myId);
     }
 
     @Override

@@ -12,10 +12,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v2/room")
@@ -35,6 +32,15 @@ public class RoomControllerV2 {
             @RequestAttribute("reqUserId") Long userId
     ) {
         Room room = roomService.create(userId);
+        return ResponseEntity.ok(roomMapper.convert(userId, room));
+    }
+
+    @GetMapping("")
+    public ResponseEntity<RoomDto> getRoom(
+            @RequestAttribute("reqUserId") Long userId,
+            @RequestParam("roomId") Long roomId
+    ) {
+        Room room = roomService.create(roomId);
         return ResponseEntity.ok(roomMapper.convert(userId, room));
     }
 
@@ -90,16 +96,42 @@ public class RoomControllerV2 {
     }
 
     @RoomAuthorizationSubscription
-    @MessageMapping("/room/{roomId}/users/sendOffer")
-    public void addRoomUser(
+    @MessageMapping("/room/{roomId}/users/offer/send")
+    public void sendOffer(
             SimpMessageHeaderAccessor accessor,
             @DestinationVariable("roomId") Long roomId,
             String userIdMessage
     ) {
         Long myId = (Long)accessor.getSessionAttributes().get("userId");
         Long userId = Long.valueOf(userIdMessage);
-        roomService.addUser(roomId, myId, userId);
+        roomService.sendOffer(roomId, myId, userId);
         simpMessagingTemplate.convertAndSend("/app/queue/room/invites", roomId);
+    }
+
+    @RoomAuthorizationSubscription
+    @MessageMapping("/room/{roomId}/users/offer/accept")
+    public void acceptOffer(
+            SimpMessageHeaderAccessor accessor,
+            @DestinationVariable("roomId") Long roomId,
+            String userIdMessage
+    ) {
+        Long myId = (Long)accessor.getSessionAttributes().get("userId");
+        Long userId = Long.valueOf(userIdMessage);
+        roomService.sendOffer(roomId, myId, userId);
+        simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/users", "accept:" + myId);
+    }
+
+    @RoomAuthorizationSubscription
+    @MessageMapping("/room/{roomId}/users/offer/decline")
+    public void declineOffer(
+            SimpMessageHeaderAccessor accessor,
+            @DestinationVariable("roomId") Long roomId,
+            String userIdMessage
+    ) {
+        Long myId = (Long)accessor.getSessionAttributes().get("userId");
+        Long userId = Long.valueOf(userIdMessage);
+        roomService.sendOffer(roomId, myId, userId);
+        simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/users", "decline:" + myId);
     }
 
     @RoomAuthorizationSubscription
@@ -111,7 +143,7 @@ public class RoomControllerV2 {
         Long myId = (Long)accessor.getSessionAttributes().get("userId");
         roomService.leave(roomId, myId);
         if (roomService.isEmpty(roomId)) roomService.closeRoom(roomId);
-        simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/users", "left: " + myId);
+        simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/users", "left:" + myId);
     }
 
     @RoomAuthorizationSubscription
@@ -125,7 +157,7 @@ public class RoomControllerV2 {
         Long userId = Long.valueOf(userIdMessage);
         roomService.removeUser(roomId, myId, userId);
         if (roomService.isEmpty(roomId)) roomService.closeRoom(roomId);
-        simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/users", "left: " + userIdMessage);
+        simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/users", "left:" + userIdMessage);
     }
 
 }
