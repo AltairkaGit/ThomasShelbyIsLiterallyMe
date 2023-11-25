@@ -25,7 +25,7 @@ public abstract class BandMapper {
 
     public BandDto convert(BandEntity entity) {
         BandDto dto = new BandDto();
-        List<UserEntity> members = bandMemberRepository.findAllBandUsers(entity.getBandId());
+        List<UserEntity> members = bandMemberRepository.findAllBandArtists(entity.getBandId());
 
         dto.setName(entity.getName());
         dto.setBandId(entity.getBandId());

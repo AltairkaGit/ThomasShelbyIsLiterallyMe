@@ -32,6 +32,12 @@ public abstract class FileResponseMapper implements Converter<FileEntity, FileRe
         return file.map(fileEntity -> fileService.composeUrl(fileEntity.getName())).orElse("");
     }
 
+    @Named("getFileUrlWithNull")
+    public String map(FileEntity file) {
+        if (file == null) return "";
+        return fileService.composeUrl(file.getName());
+    }
+
     @Named("getFileUrls")
     public List<String> map(List<FileEntity> files) {
         if (files == null) return null;

@@ -42,7 +42,7 @@ public class BandControllerV2 {
     }
 
     @PostMapping("/member")
-    ResponseEntity<Void> createAlbum(
+    ResponseEntity<Void> addMember(
             @RequestAttribute("reqUserId") Long userId,
             @RequestBody AddBandMemberDto dto
     ) throws AuthenticationException {

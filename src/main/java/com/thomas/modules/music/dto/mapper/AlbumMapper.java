@@ -15,7 +15,7 @@ import java.util.List;
 @Component
 @Mapper(componentModel = "spring", uses={FileResponseMapper.class})
 public interface AlbumMapper {
-    @Mapping(target = "pictureUrl", source = "album.picture", qualifiedByName = "getFileUrl")
+    @Mapping(target = "pictureUrl", source = "album.picture", qualifiedByName = "getFileUrlWithNull")
     @Mapping(target = "bandName", source = "album.band.name")
     @Mapping(target = "bandId", source = "album.band.bandId")
     AlbumDto convert(AlbumEntity album);

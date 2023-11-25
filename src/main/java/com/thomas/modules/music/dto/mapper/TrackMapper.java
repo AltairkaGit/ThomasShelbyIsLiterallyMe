@@ -17,9 +17,9 @@ import java.util.List;
 public interface TrackMapper {
     @Mapping(target = "bandName", source = "track.album.band.name")
     @Mapping(target = "albumId", source = "track.album.albumId")
-    @Mapping(target = "trackUrl", source = "track.track", qualifiedByName = "getFileUrl")
-    @Mapping(target = "clipUrl", source = "track.clip", qualifiedByName = "getFileUrl")
-    @Mapping(target = "pictureUrl", source = "track.picture", qualifiedByName = "getFileUrl")
+    @Mapping(target = "trackUrl", source = "track.track", qualifiedByName = "getFileUrlWithNull")
+    @Mapping(target = "clipUrl", source = "track.clip", qualifiedByName = "getFileUrlWithNull")
+    @Mapping(target = "pictureUrl", source = "track.picture", qualifiedByName = "getFileUrlWithNull")
     @Mapping(target = "genre", source = "track.genre.genre")
     TrackDto convert(TrackEntity track);
     List<TrackDto> convertList(List<TrackEntity> tracks);
