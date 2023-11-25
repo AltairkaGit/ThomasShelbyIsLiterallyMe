@@ -9,6 +9,7 @@ import com.thomas.modules.chat.entity.MessageEntity;
 import com.thomas.modules.chat.entity.MessageSeenEntity;
 import com.thomas.modules.file.entity.FileEntity;
 import com.thomas.modules.friend.entity.FriendsEntity;
+import com.thomas.modules.music.entity.LibraryEntity;
 import com.thomas.modules.server.entity.ServerUserEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -74,6 +75,10 @@ public class UserEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     @JsonBackReference
     private Set<ServerUserEntity> myServers;
+
+    @OneToMany(fetch =  FetchType.LAZY, mappedBy = "user")
+    @JsonBackReference
+    private Set<LibraryEntity> likedTracks;
 
     public Long getUserId() {
         return userId;
@@ -170,6 +175,22 @@ public class UserEntity {
 
     public void setMyServers(Set<ServerUserEntity> myServers) {
         this.myServers = myServers;
+    }
+
+    public Set<MessageSeenEntity> getSeenMessages() {
+        return seenMessages;
+    }
+
+    public void setSeenMessages(Set<MessageSeenEntity> seenMessages) {
+        this.seenMessages = seenMessages;
+    }
+
+    public Set<LibraryEntity> getLikedTracks() {
+        return likedTracks;
+    }
+
+    public void setLikedTracks(Set<LibraryEntity> likedTracks) {
+        this.likedTracks = likedTracks;
     }
 
     @Override

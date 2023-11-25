@@ -32,6 +32,7 @@ public class AuthRestControllerV2 {
     @Operation(summary = "creates a new user with credentials, sends refresh and access token if ok, 400 otherwise")
     public ResponseEntity<TokensResponseDto> createUser(@RequestBody AuthRequestDto authRequestDto) throws CredentialException {
         UserEntity registeringUser = authRequestMapper.convert(authRequestDto);
+        registeringUser.setGender(UserEntity.Gender.male);
         UserEntity user = authService.registerUser(registeringUser);
         TokensResponseDto tokens = loginService.jwtLoginUsernamePassword(user, authRequestDto.getPassword());
         return ResponseEntity.ok(tokens);
