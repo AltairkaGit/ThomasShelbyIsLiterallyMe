@@ -86,7 +86,8 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public boolean checkUserInRoom(Long userId, Long roomId) {
-        return false;
+        Room room = rooms.get(roomId);
+        return room.getUsers().contains(userId);
     }
 
     @Override
