@@ -40,7 +40,7 @@ public class RoomMessageDto {
 
     @Override
     public String toString() {
-        return "RoomMessageDto{" +
+        return "{" +
                 "senderId=" + senderId +
                 ", senderPictureUrl='" + senderPictureUrl + '\'' +
                 ", content='" + content + '\'' +
