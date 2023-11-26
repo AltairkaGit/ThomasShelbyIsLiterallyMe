@@ -141,21 +141,6 @@ public class TrackControllerV2 {
             return new ResponseEntity<>(body, headers, HttpStatus.OK);
     }
 
-    @Operation(description = "get hls index file of the mp3")
-    @RequestMapping(
-            path = "/track/{mp3}",
-            method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<StreamingResponseBody> mp3(
-            @PathVariable String mp3
-    ) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Content-Type", "application/vnd.apple.mpegurl");
-            headers.set("Content-Disposition", "attachment;filename=" + mp3);
-            StreamingResponseBody body = trackService.mp3(mp3);
-            return new ResponseEntity<>(body, headers, HttpStatus.OK);
-    }
-
     @PostMapping("/tracks")
     public ResponseEntity<List<TrackDto>> getTracksByIds(
             @RequestBody TracksRequestDto dto

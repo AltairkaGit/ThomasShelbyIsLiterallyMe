@@ -1,5 +1,6 @@
 package com.thomas.modules.music.controller;
 
+import com.thomas.modules.file.service.FileService;
 import com.thomas.modules.music.dto.RoomDto;
 import com.thomas.modules.music.dto.TrackDto;
 import com.thomas.modules.music.dto.mapper.RoomMapper;
@@ -10,6 +11,8 @@ import com.thomas.modules.music.model.RoomMessage;
 import com.thomas.modules.music.repos.TrackRepository;
 import com.thomas.modules.music.service.RoomService;
 import com.thomas.modules.security.websocket.RoomAuthorizationSubscription;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -17,6 +20,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.naming.AuthenticationException;
 
@@ -28,19 +32,21 @@ public class RoomControllerV2 {
     private final TrackMapper trackMapper;
     private final TrackRepository trackRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final FileService fileService;
 
     public RoomControllerV2(
             RoomMapper roomMapper,
             RoomService roomService,
             TrackMapper trackMapper,
             TrackRepository trackRepository,
-            SimpMessagingTemplate simpMessagingTemplate
-    ) {
+            SimpMessagingTemplate simpMessagingTemplate,
+            FileService fileService) {
         this.roomMapper = roomMapper;
         this.roomService = roomService;
         this.trackMapper = trackMapper;
         this.trackRepository = trackRepository;
         this.simpMessagingTemplate = simpMessagingTemplate;
+        this.fileService = fileService;
     }
 
     @PostMapping("")
@@ -70,12 +76,16 @@ public class RoomControllerV2 {
     }
 
     @GetMapping("/{roomId}/stream")
-    public ResponseEntity<TrackDto> getStream(
+    public ResponseEntity<StreamingResponseBody> getStream(
             @RequestAttribute("reqUserId") Long userId,
             @PathVariable("roomId") Long roomId
     ) {
-        TrackEntity track = trackRepository.findById(roomService.getPlayingNow(roomId)).get();
-        return ResponseEntity.ok(trackMapper.convert(track));
+        Room room = roomService.getById(roomId);
+        String filename = trackRepository.findById(roomService.getPlayingNow(roomId)).get().getName();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/vnd.apple.mpegurl");
+        headers.set("Content-Disposition", "attachment;filename=" + filename);
+        return new ResponseEntity<>(room.getStream(), headers, HttpStatus.OK);
     }
 
     @PutMapping("/{roomId}-{artifact}")
