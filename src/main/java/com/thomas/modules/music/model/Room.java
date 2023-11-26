@@ -1,9 +1,11 @@
 package com.thomas.modules.music.model;
 
+import com.thomas.modules.file.service.FileService;
 import com.thomas.modules.music.service.TrackService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -13,7 +15,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Room {
-    private final TrackService trackService;
     private final SimpMessagingTemplate messagingTemplate;
     private static final int QUEUE_LIMIT = 100;
     private volatile AtomicBoolean paused = new AtomicBoolean(false);
@@ -24,10 +25,10 @@ public class Room {
     private List<Long> offers;
     private String artifact;
     private StreamingResponseBody stream;
+    private BufferedReader reader;
 
     public Room(Long userId, TrackService trackService, SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
-        this.trackService = trackService;
         this.ownerId = userId;
         this.trackQueue = new ConcurrentLinkedQueue<>();
         this.messageQueue = new ConcurrentLinkedQueue<>();
@@ -52,12 +53,37 @@ public class Room {
 
     public void addInQueue(Long trackId) {
         trackQueue.add(trackId);
-
     }
 
-    public void playTrack(String url) {
+    public void playQueue(FileService fileService) {
         release();
+        while (!trackQueue.isEmpty()) {
+            Long trackId = getPlayingNow();
+            String url = fileService.getFile(trackId).getName();
+            try {
+                reader = new BufferedReader(new InputStreamReader(new FileInputStream(fileService.urlToFilename(url))));
+                stream = outputStream -> {
+                    try (outputStream) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            if (!line.endsWith(".ts") || paused.get()) continue;
+                            outputStream.write(line.getBytes());
+                            outputStream.write(System.lineSeparator().getBytes());
+                        }
+                        outputStream.flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        reader.close();
+                        trackQueue.poll();
+                    }
+                };
+                messagingTemplate.convertAndSend("/app/queue/room/" + ownerId + "/tracks", "now:" + trackId);
 
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public void pause() {

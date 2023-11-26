@@ -219,4 +219,58 @@ public class RoomControllerV2 {
         simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/users", "left:" + userIdMessage);
     }
 
+    @RoomAuthorizationSubscription
+    @SubscribeMapping("/app/queue/room/{roomId}/tracks")
+    public void subscribeTrackEvents(
+            SimpMessageHeaderAccessor accessor,
+            @DestinationVariable("roomId") String roomId
+    ) {
+        String myId = String.valueOf((Long)accessor.getSessionAttributes().get("userId"));
+    }
+
+    @RoomAuthorizationSubscription
+    @MessageMapping("/room/{roomId}/tracks/add")
+    public void pushTrackInQueue(
+            SimpMessageHeaderAccessor accessor,
+            @DestinationVariable("roomId") Long roomId,
+            String trackIdMes
+    ) {
+        Long myId = (Long)accessor.getSessionAttributes().get("userId");
+        Long trackId = Long.valueOf(trackIdMes);
+        Room room = roomService.getById(roomId);
+        if (room.getOwnerId() != myId) return;
+        room.addInQueue(trackId);
+        simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/tracks", "add:" + trackId);
+    }
+
+    @RoomAuthorizationSubscription
+    @MessageMapping("/room/{roomId}/tracks/pause")
+    public void pause(
+            SimpMessageHeaderAccessor accessor,
+            @DestinationVariable("roomId") Long roomId,
+            String trackIdMes
+    ) {
+        Long myId = (Long)accessor.getSessionAttributes().get("userId");
+        Long trackId = Long.valueOf(trackIdMes);
+        Room room = roomService.getById(roomId);
+        if (room.getOwnerId() != myId) return;
+        room.pause();
+        simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/tracks", "pause:");
+    }
+
+    @RoomAuthorizationSubscription
+    @MessageMapping("/room/{roomId}/tracks/release")
+    public void release(
+            SimpMessageHeaderAccessor accessor,
+            @DestinationVariable("roomId") Long roomId,
+            String trackIdMes
+    ) {
+        Long myId = (Long)accessor.getSessionAttributes().get("userId");
+        Long trackId = Long.valueOf(trackIdMes);
+        Room room = roomService.getById(roomId);
+        if (room.getOwnerId() != myId) return;
+        room.release();
+        simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/tracks", "release:");
+    }
+
 }
