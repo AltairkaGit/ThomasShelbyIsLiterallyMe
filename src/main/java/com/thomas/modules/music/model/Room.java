@@ -22,6 +22,7 @@ public class Room {
         this.messageQueue = new ConcurrentLinkedQueue<>();
         this.users = new CopyOnWriteArrayList<>();
         this.users.add(ownerId);
+        this.offers = new CopyOnWriteArrayList<>();
         this.artifact = UUID.randomUUID().toString();
     }
 

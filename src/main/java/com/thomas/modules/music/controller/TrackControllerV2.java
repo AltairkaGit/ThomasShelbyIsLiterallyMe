@@ -15,14 +15,20 @@ import com.thomas.modules.music.service.AlbumService;
 import com.thomas.modules.music.service.BandService;
 import com.thomas.modules.user.entity.UserEntity;
 import com.thomas.modules.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.naming.AuthenticationException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v2/music")
@@ -108,6 +114,19 @@ public class TrackControllerV2 {
         return ResponseEntity.ok(trackMapper.convert(track.get()));
     }
 
+    @Operation(description = "get hls index file of the track")
+    @RequestMapping(
+            path = "/{trackId}/index.mp3",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<StreamingResponseBody> index(@PathVariable Long trackId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/vnd.apple.mpegurl");
+        headers.set("Content-Disposition", "attachment;filename=index.m3u8");
+        StreamingResponseBody body =null;// videoService.m3u8Index();
+        return new ResponseEntity<>(body, headers, HttpStatus.OK);
+    }
+
     @PostMapping("/tracks")
     public ResponseEntity<List<TrackDto>> getTracksByIds(
             @RequestBody TracksRequestDto dto
@@ -115,4 +134,6 @@ public class TrackControllerV2 {
         List<TrackEntity> tracks = trackRepository.findAllTracksByTrackIdIn(dto.getIds());
         return ResponseEntity.ok(trackMapper.convertList(tracks));
     }
+
+
 }
