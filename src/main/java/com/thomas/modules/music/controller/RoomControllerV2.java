@@ -76,8 +76,8 @@ public class RoomControllerV2 {
         Long roomId = Long.valueOf(roomIdParam);
 
         RoomMessage message = roomService.sendMessage(roomId, myId, content);
-        System.out.println("" + roomId + " " + myId + " " + message);
-        simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/chat", message);
+        System.out.println("" + roomId + " " + myId + " " + roomMapper.convertMessage(message));
+        simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/chat", roomMapper.convertMessage(message));
     }
 
     @RoomAuthorizationSubscription
@@ -109,6 +109,14 @@ public class RoomControllerV2 {
         String myId = String.valueOf((Long)accessor.getSessionAttributes().get("userId"));
     }
 
+    @SubscribeMapping("/app/queue/room/invites")
+    public void subscribeRoomInvites(
+            SimpMessageHeaderAccessor accessor,
+            @DestinationVariable("roomId") String roomId
+    ) {
+        String myId = String.valueOf((Long)accessor.getSessionAttributes().get("userId"));
+    }
+
     @RoomAuthorizationSubscription
     @MessageMapping("/room/{roomId}/users/offer/send")
     public void sendOffer(
@@ -126,12 +134,10 @@ public class RoomControllerV2 {
     @MessageMapping("/room/{roomId}/users/offer/accept")
     public void acceptOffer(
             SimpMessageHeaderAccessor accessor,
-            @DestinationVariable("roomId") Long roomId,
-            String userIdMessage
+            @DestinationVariable("roomId") Long roomId
     ) {
         Long myId = (Long)accessor.getSessionAttributes().get("userId");
-        Long userId = Long.valueOf(userIdMessage);
-        roomService.sendOffer(roomId, myId, userId);
+        roomService.acceptOffer(roomId, myId);
         simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/users", "accept:" + myId);
     }
 
@@ -139,12 +145,10 @@ public class RoomControllerV2 {
     @MessageMapping("/room/{roomId}/users/offer/decline")
     public void declineOffer(
             SimpMessageHeaderAccessor accessor,
-            @DestinationVariable("roomId") Long roomId,
-            String userIdMessage
+            @DestinationVariable("roomId") Long roomId
     ) {
         Long myId = (Long)accessor.getSessionAttributes().get("userId");
-        Long userId = Long.valueOf(userIdMessage);
-        roomService.sendOffer(roomId, myId, userId);
+        roomService.declineOffer(roomId, myId);
         simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/users", "decline:" + myId);
     }
 
