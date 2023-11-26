@@ -2,6 +2,7 @@ package com.thomas.modules.music.service;
 
 import com.thomas.modules.music.model.Room;
 import com.thomas.modules.music.model.RoomMessage;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.naming.AuthenticationException;
 
@@ -11,6 +12,8 @@ public interface RoomService {
     Room create(Long userId);
     Room getById(Long roomId) throws IllegalArgumentException;
     RoomMessage sendMessage(Long roomId, Long senderId, String content);
+    StreamingResponseBody getStream(Long roomId);
+    Long getPlayingNow(Long roomId);
     void sendOffer(Long roomId, Long myId, Long UserId);
     void joinRoom(Long roomId, Long myId, String artifact) throws AuthenticationException;
     void acceptOffer(Long roomId, Long myId);

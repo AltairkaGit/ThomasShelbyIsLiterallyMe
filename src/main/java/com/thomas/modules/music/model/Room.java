@@ -1,22 +1,33 @@
 package com.thomas.modules.music.model;
 
+import com.thomas.modules.music.service.TrackService;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Room {
+    private final TrackService trackService;
+    private final SimpMessagingTemplate messagingTemplate;
     private static final int QUEUE_LIMIT = 100;
+    private volatile AtomicBoolean paused = new AtomicBoolean(false);
     private Long ownerId;
     private Queue<Long> trackQueue;
     private Queue<RoomMessage> messageQueue;
     private List<Long> users;
     private List<Long> offers;
     private String artifact;
+    private StreamingResponseBody stream;
 
-    public Room(Long userId) {
+    public Room(Long userId, TrackService trackService, SimpMessagingTemplate messagingTemplate) {
+        this.messagingTemplate = messagingTemplate;
+        this.trackService = trackService;
         this.ownerId = userId;
         this.trackQueue = new ConcurrentLinkedQueue<>();
         this.messageQueue = new ConcurrentLinkedQueue<>();
@@ -37,6 +48,28 @@ public class Room {
             users.remove(userId);
             users.add(userId);
         }
+    }
+
+    public void addInQueue(Long trackId) {
+        trackQueue.add(trackId);
+
+    }
+
+    public void playTrack(String url) {
+        release();
+
+    }
+
+    public void pause() {
+        paused.set(true);
+    }
+
+    public void release() {
+        paused.set(false);
+    }
+
+    public Long getPlayingNow() {
+        return trackQueue.peek();
     }
 
     public void declineOffer(Long myId) {
@@ -95,13 +128,11 @@ public class Room {
         return artifact;
     }
 
-    @Override
-    public String toString() {
-        return "Room{" +
-                "ownerId=" + ownerId +
-                ", trackQueue=" + trackQueue.toString() +
-                ", messageQueue=" + messageQueue.toString() +
-                ", users=" + users.toString() +
-                '}';
+    public StreamingResponseBody getStream() {
+        return stream;
+    }
+
+    public void setStream(StreamingResponseBody stream) {
+        this.stream = stream;
     }
 }

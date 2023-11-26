@@ -1,9 +1,13 @@
 package com.thomas.modules.music.controller;
 
 import com.thomas.modules.music.dto.RoomDto;
+import com.thomas.modules.music.dto.TrackDto;
 import com.thomas.modules.music.dto.mapper.RoomMapper;
+import com.thomas.modules.music.dto.mapper.TrackMapper;
+import com.thomas.modules.music.entity.TrackEntity;
 import com.thomas.modules.music.model.Room;
 import com.thomas.modules.music.model.RoomMessage;
+import com.thomas.modules.music.repos.TrackRepository;
 import com.thomas.modules.music.service.RoomService;
 import com.thomas.modules.security.websocket.RoomAuthorizationSubscription;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +25,21 @@ import javax.naming.AuthenticationException;
 public class RoomControllerV2 {
     private final RoomMapper roomMapper;
     private final RoomService roomService;
+    private final TrackMapper trackMapper;
+    private final TrackRepository trackRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
-    public RoomControllerV2(RoomMapper roomMapper, RoomService roomService, SimpMessagingTemplate simpMessagingTemplate) {
+    public RoomControllerV2(
+            RoomMapper roomMapper,
+            RoomService roomService,
+            TrackMapper trackMapper,
+            TrackRepository trackRepository,
+            SimpMessagingTemplate simpMessagingTemplate
+    ) {
         this.roomMapper = roomMapper;
         this.roomService = roomService;
+        this.trackMapper = trackMapper;
+        this.trackRepository = trackRepository;
         this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
@@ -44,6 +58,24 @@ public class RoomControllerV2 {
     ) {
         Room room = roomService.create(roomId);
         return ResponseEntity.ok(roomMapper.convert(userId, room));
+    }
+
+    @GetMapping("/{roomId}/playingNow")
+    public ResponseEntity<TrackDto> getPlayingNow(
+            @RequestAttribute("reqUserId") Long userId,
+            @PathVariable("roomId") Long roomId
+    ) {
+        TrackEntity track = trackRepository.findById(roomService.getPlayingNow(roomId)).get();
+        return ResponseEntity.ok(trackMapper.convert(track));
+    }
+
+    @GetMapping("/{roomId}/stream")
+    public ResponseEntity<TrackDto> getStream(
+            @RequestAttribute("reqUserId") Long userId,
+            @PathVariable("roomId") Long roomId
+    ) {
+        TrackEntity track = trackRepository.findById(roomService.getPlayingNow(roomId)).get();
+        return ResponseEntity.ok(trackMapper.convert(track));
     }
 
     @PutMapping("/{roomId}-{artifact}")

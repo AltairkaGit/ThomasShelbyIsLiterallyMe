@@ -3,7 +3,10 @@ package com.thomas.modules.music.service.impl;
 import com.thomas.modules.music.model.Room;
 import com.thomas.modules.music.model.RoomMessage;
 import com.thomas.modules.music.service.RoomService;
+import com.thomas.modules.music.service.TrackService;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.naming.AuthenticationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,13 +16,32 @@ import java.util.regex.Pattern;
 @Service
 public class RoomServiceImpl implements RoomService {
     private final ConcurrentHashMap<Long, Room> rooms = new ConcurrentHashMap<>();
+    private final TrackService trackService;
+    private final SimpMessagingTemplate messagingTemplate;
+
+    public RoomServiceImpl(TrackService trackService, SimpMessagingTemplate messagingTemplate) {
+        this.trackService = trackService;
+        this.messagingTemplate = messagingTemplate;
+    }
 
     @Override
     public Room create(Long userId) {
-        Room room = new Room(userId);
+        Room room = new Room(userId, trackService, messagingTemplate);
         rooms.put(userId, room);
         System.out.println(rooms.get(userId));
         return room;
+    }
+
+    @Override
+    public StreamingResponseBody getStream(Long roomId) {
+        Room room = rooms.get(roomId);
+        return room.getStream();
+    }
+
+    @Override
+    public Long getPlayingNow(Long roomId) {
+        Room room = rooms.get(roomId);
+        return room.getPlayingNow();
     }
 
     @Override
