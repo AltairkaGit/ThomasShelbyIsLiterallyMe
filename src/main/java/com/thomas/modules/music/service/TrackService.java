@@ -5,5 +5,6 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 public interface TrackService {
     Long getDuration(MultipartFile track);
-
+    StreamingResponseBody m3u8Index(String url);
+    StreamingResponseBody mp3(String filename);
 }

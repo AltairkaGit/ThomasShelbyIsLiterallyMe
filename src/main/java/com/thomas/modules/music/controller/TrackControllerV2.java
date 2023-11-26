@@ -13,6 +13,7 @@ import com.thomas.modules.music.entity.TrackEntity;
 import com.thomas.modules.music.repos.TrackRepository;
 import com.thomas.modules.music.service.AlbumService;
 import com.thomas.modules.music.service.BandService;
+import com.thomas.modules.music.service.TrackService;
 import com.thomas.modules.user.entity.UserEntity;
 import com.thomas.modules.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,8 +41,18 @@ public class TrackControllerV2 {
     private final TrackMapper trackMapper;
     private final FileService fileService;
     private final TrackRepository trackRepository;
+    private final TrackService trackService;
 
-    public TrackControllerV2(UserService userService, AlbumService albumService, BandService bandService, AlbumMapper albumMapper, TrackMapper trackMapper, FileService fileService, TrackRepository trackRepository) {
+    public TrackControllerV2(
+            UserService userService,
+            AlbumService albumService,
+            BandService bandService,
+            AlbumMapper albumMapper,
+            TrackMapper trackMapper,
+            FileService fileService,
+            TrackRepository trackRepository,
+            TrackService trackService
+    ) {
         this.userService = userService;
         this.albumService = albumService;
         this.bandService = bandService;
@@ -49,6 +60,7 @@ public class TrackControllerV2 {
         this.trackMapper = trackMapper;
         this.fileService = fileService;
         this.trackRepository = trackRepository;
+        this.trackService = trackService;
     }
 
     @GetMapping("/lastReleases")
@@ -114,17 +126,34 @@ public class TrackControllerV2 {
         return ResponseEntity.ok(trackMapper.convert(track.get()));
     }
 
-    @Operation(description = "get hls index file of the track")
+    @Operation(description = "get hls index file of the m3u8")
     @RequestMapping(
-            path = "/{trackId}/index.mp3",
+            path = "/track/{m3u8Url}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<StreamingResponseBody> index(@PathVariable Long trackId) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/vnd.apple.mpegurl");
-        headers.set("Content-Disposition", "attachment;filename=index.m3u8");
-        StreamingResponseBody body =null;// videoService.m3u8Index();
-        return new ResponseEntity<>(body, headers, HttpStatus.OK);
+    public ResponseEntity<StreamingResponseBody> index(
+            @PathVariable String m3u8Url
+    ) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/vnd.apple.mpegurl");
+            headers.set("Content-Disposition", "attachment;filename=" + m3u8Url);
+            StreamingResponseBody body = trackService.m3u8Index(m3u8Url);
+            return new ResponseEntity<>(body, headers, HttpStatus.OK);
+    }
+
+    @Operation(description = "get hls index file of the mp3")
+    @RequestMapping(
+            path = "/track/{mp3}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<StreamingResponseBody> mp3(
+            @PathVariable String mp3
+    ) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/vnd.apple.mpegurl");
+            headers.set("Content-Disposition", "attachment;filename=" + mp3);
+            StreamingResponseBody body = trackService.mp3(mp3);
+            return new ResponseEntity<>(body, headers, HttpStatus.OK);
     }
 
     @PostMapping("/tracks")

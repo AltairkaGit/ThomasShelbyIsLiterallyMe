@@ -55,6 +55,8 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public void joinRoom(Long roomId, Long myId, String artifact) throws AuthenticationException {
         Room room = rooms.get(roomId);
+        System.out.println(room.getArtifact());
+        System.out.println(artifact);
         if (!room.getArtifact().equals(artifact))
             throw new AuthenticationException("link is invalid");
         room.joinRoom(myId);
