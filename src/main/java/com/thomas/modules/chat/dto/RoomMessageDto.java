@@ -37,4 +37,14 @@ public class RoomMessageDto {
     public void setSendTimestamp(Long sendTimestamp) {
         this.sendTimestamp = sendTimestamp;
     }
+
+    @Override
+    public String toString() {
+        return "RoomMessageDto{" +
+                "senderId=" + senderId +
+                ", senderPictureUrl='" + senderPictureUrl + '\'' +
+                ", content='" + content + '\'' +
+                ", sendTimestamp=" + sendTimestamp +
+                '}';
+    }
 }
