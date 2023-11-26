@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.naming.AuthenticationException;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,9 +77,9 @@ public class RoomServiceImpl implements RoomService {
     public void joinRoom(Long roomId, Long myId, String artifact) throws AuthenticationException {
         Room room = rooms.get(roomId);
         System.out.println("Hello link");
-        System.out.println(room.getArtifact());
-        System.out.println(artifact);
-        if (!room.getArtifact().equals(artifact))
+        System.out.println(room.getOwnerId());
+        System.out.println(roomId);
+        if (!Objects.equals(room.getOwnerId(), roomId))
             throw new AuthenticationException("link is invalid");
         room.joinRoom(myId);
     }

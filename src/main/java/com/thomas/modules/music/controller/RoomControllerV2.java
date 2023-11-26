@@ -89,13 +89,12 @@ public class RoomControllerV2 {
         return new ResponseEntity<>(room.getStream(), headers, HttpStatus.OK);
     }
 
-    @PutMapping("/{roomId}:{artifact}")
+    @PutMapping("/{roomId}")
     public ResponseEntity<RoomDto> joinRoom(
             @RequestAttribute("reqUserId") Long userId,
-            @PathVariable("roomId") Long roomId,
-            @PathVariable("artifact") String artifact
+            @PathVariable("roomId") Long roomId
     ) throws AuthenticationException {
-        roomService.joinRoom(roomId, userId, artifact);
+        roomService.joinRoom(roomId, userId, "");
         Room room = roomService.getById(roomId);
         return ResponseEntity.ok(roomMapper.convert(userId, room));
     }
