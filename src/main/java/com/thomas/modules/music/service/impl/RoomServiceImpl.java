@@ -16,17 +16,15 @@ import java.util.regex.Pattern;
 @Service
 public class RoomServiceImpl implements RoomService {
     private final ConcurrentHashMap<Long, Room> rooms = new ConcurrentHashMap<>();
-    private final TrackService trackService;
     private final SimpMessagingTemplate messagingTemplate;
 
-    public RoomServiceImpl(TrackService trackService, SimpMessagingTemplate messagingTemplate) {
-        this.trackService = trackService;
+    public RoomServiceImpl(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
     }
 
     @Override
     public Room create(Long userId) {
-        Room room = new Room(userId, trackService, messagingTemplate);
+        Room room = new Room(userId, messagingTemplate);
         rooms.put(userId, room);
         System.out.println(rooms.get(userId));
         return room;
@@ -77,6 +75,7 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public void joinRoom(Long roomId, Long myId, String artifact) throws AuthenticationException {
         Room room = rooms.get(roomId);
+        System.out.println("Hello link");
         System.out.println(room.getArtifact());
         System.out.println(artifact);
         if (!room.getArtifact().equals(artifact))

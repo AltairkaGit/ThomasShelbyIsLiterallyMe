@@ -12,12 +12,13 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Room {
     private final SimpMessagingTemplate messagingTemplate;
     private static final int QUEUE_LIMIT = 100;
-    private volatile AtomicBoolean paused = new AtomicBoolean(false);
+    private volatile AtomicBoolean paused = new AtomicBoolean(true);
     private Long ownerId;
     private Queue<Long> trackQueue;
     private Queue<RoomMessage> messageQueue;
@@ -26,8 +27,9 @@ public class Room {
     private String artifact;
     private StreamingResponseBody stream;
     private BufferedReader reader;
+    private CountDownLatch streamFinishedLatch = new CountDownLatch(1);
 
-    public Room(Long userId, TrackService trackService, SimpMessagingTemplate messagingTemplate) {
+    public Room(Long userId, SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
         this.ownerId = userId;
         this.trackQueue = new ConcurrentLinkedQueue<>();
@@ -76,11 +78,13 @@ public class Room {
                     } finally {
                         reader.close();
                         trackQueue.poll();
+                        streamFinishedLatch.countDown();
                     }
                 };
                 messagingTemplate.convertAndSend("/app/queue/room/" + ownerId + "/tracks", "now:" + trackId);
-
-            } catch (FileNotFoundException e) {
+                streamFinishedLatch.await();
+                streamFinishedLatch = new CountDownLatch(1);
+            } catch (FileNotFoundException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }

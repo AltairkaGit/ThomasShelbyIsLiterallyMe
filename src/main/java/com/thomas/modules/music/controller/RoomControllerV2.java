@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.naming.AuthenticationException;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v2/room")
@@ -88,7 +89,7 @@ public class RoomControllerV2 {
         return new ResponseEntity<>(room.getStream(), headers, HttpStatus.OK);
     }
 
-    @PutMapping("/{roomId}-{artifact}")
+    @PutMapping("/{roomId}:{artifact}")
     public ResponseEntity<RoomDto> joinRoom(
             @RequestAttribute("reqUserId") Long userId,
             @PathVariable("roomId") Long roomId,
@@ -244,6 +245,21 @@ public class RoomControllerV2 {
     }
 
     @RoomAuthorizationSubscription
+    @MessageMapping("/room/{roomId}/tracks/offer")
+    public void offer(
+            SimpMessageHeaderAccessor accessor,
+            @DestinationVariable("roomId") Long roomId,
+            String trackIdMes
+    ) {
+        Long myId = (Long)accessor.getSessionAttributes().get("userId");
+        Long trackId = Long.valueOf(trackIdMes);
+        Room room = roomService.getById(roomId);
+        //todo: make separate list
+        room.addInQueue(trackId);
+        simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/tracks", "offer:" + trackId);
+    }
+
+    @RoomAuthorizationSubscription
     @MessageMapping("/room/{roomId}/tracks/pause")
     public void pause(
             SimpMessageHeaderAccessor accessor,
@@ -268,8 +284,9 @@ public class RoomControllerV2 {
         Long myId = (Long)accessor.getSessionAttributes().get("userId");
         Long trackId = Long.valueOf(trackIdMes);
         Room room = roomService.getById(roomId);
-        if (room.getOwnerId() != myId) return;
+        if (!Objects.equals(room.getOwnerId(), myId)) return;
         room.release();
+        room.playQueue(fileService);
         simpMessagingTemplate.convertAndSend("/app/queue/room/" + roomId + "/tracks", "release:");
     }
 
